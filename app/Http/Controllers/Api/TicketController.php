@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Reservation;
@@ -85,40 +86,22 @@ class TicketController extends Controller
      * ミドルウェアで冪等性を保証
      * 
      */
-    public function reservePending(int $eventId)
+    public function reservePending(int $eventId, ReservePendingAction $action)
     {
-        return DB::transaction(function () use ($eventId) {
-            $event = Event::lockForUpdate()->findOrFail($eventId);
-
-            // 有効な予約数をカウント
-            $currentReservations = Reservation::where('event_id', $event->id)
-                ->where(function ($query) {
-                    $query->where('status', ReservationStatus::CONFIRMED)
-                        ->orWhere(function ($q) {
-                            $q->where('status', ReservationStatus::PENDING)
-                                ->where('expires_at', '>', now());
-                        });
-                })->count();
-
-            if ($currentReservations < $event->total_seats) {
-
-                $reservation = Reservation::create([
-                    'event_id' => $event->id,
-                    'user_id' => Auth::id(),
-                    'reserved_at' => now(),
-                    'status' => ReservationStatus::PENDING,
-                    'expires_at' => now()->addMinutes(5), // 5分間の有効期限
-                ]);
-
-                return response()->json([
-                    'message' => '席を押さえました 5分以内に決済してください (Pending)',
-                    'reservation_id' => $reservation->id,
-                    'expires_at' => $reservation->expires_at,
-                ], 201);
+        try {
+            $reservation = $action->execute($eventId, Auth::id());
+            return response()->json([
+                'message' => '仮予約が完了しました',
+                'reservation_id' => $reservation->id,
+                'expires_at' => $reservation->expires_at,
+            ], 201);
+        } catch (\Exception $e) {
+            if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                throw $e;
             }
-            // キャンセル待ちなどの追加ロジックも考慮する必要があります 今回は省く
-            return response()->json(['message' => '満席です（仮押さえ含む）'], 409);
-        });
+            $status = $e->getCode() ?: 500;
+            return response()->json(['message' => $e->getMessage()], $status);
+        }
     }
 
     /**
