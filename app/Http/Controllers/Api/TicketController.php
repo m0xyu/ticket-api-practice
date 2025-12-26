@@ -6,24 +6,26 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
     /**
-     * Reserve a ticket for an event.
-     *
-     * @param Request $request
-     * @param [type] $eventId
-     * @return void
+     * 【脆弱な実装】 Phase 1
+     * 排他制御がないため、Race Conditionによりオーバーブッキングが発生する
      */
-    public function reserve(Request $request, $eventId)
+    public function reserveUnsafe(Request $request, int $eventId)
     {
-        // 本当ならユーザーが存在するかEventに予約の終了時間などを角にするが省略します。
         $event = Event::findOrFail($eventId);
 
+        // 現在の予約数をカウント
         $currentReservations = Reservation::where('event_id', $event->id)->count();
 
+        // 空席チェック
         if ($currentReservations < $event->total_seats) {
+
+            // 競合状態を再現しやすくするためのウェイト
+            usleep(200000); // 0.2秒
 
             $reservation = Reservation::create([
                 'event_id' => $event->id,
@@ -32,13 +34,38 @@ class TicketController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'reservation successful',
+                'message' => '予約完了しました (Unsafe)',
                 'reservation_id' => $reservation->id
             ], 201);
         }
 
-        return response()->json([
-            'message' => 'fully booked',
-        ], 409);
+        return response()->json(['message' => '満席です'], 409);
+    }
+
+    public function reserveSecure(Request $request, int $eventId)
+    {
+
+        // トランザクション開始
+        return DB::transaction(function () use ($eventId, $request) {
+            // lockForUpdateで取得したデータがデータベース内で変更されないことを保証する
+            $event = Event::lockForUpdate()->findOrFail($eventId);
+            $currentReservations = Reservation::where('event_id', $event->id)->count();
+
+            if ($currentReservations < $event->total_seats) {
+                usleep(200000);
+
+                $reservation = Reservation::create([
+                    'event_id' => $event->id,
+                    'user_id' => $request->input('user_id'),
+                    'reserved_at' => now(),
+                ]);
+
+                return response()->json([
+                    'message' => '予約完了しました (Secure)',
+                    'reservation_id' => $reservation->id
+                ], 201);
+            }
+            return response()->json(['message' => '満席です'], 409);
+        });
     }
 }

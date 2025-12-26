@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('user_id');
             $table->dateTime('reserved_at');
             $table->timestamps();
-
+            // 同じユーザーが同じイベントに複数予約できないようにする
             $table->unique(['event_id', 'user_id']);
         });
     }
