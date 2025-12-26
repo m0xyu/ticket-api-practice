@@ -17,6 +17,8 @@ return new class extends Migration
             $table->integer('user_id');
             $table->dateTime('reserved_at');
             $table->timestamps();
+
+            $table->unique(['event_id', 'user_id']);
         });
     }
 
