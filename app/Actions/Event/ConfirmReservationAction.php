@@ -22,7 +22,7 @@ class ConfirmReservationAction
     public function execute(int $reservationId, int $userId): Reservation
     {
         return DB::transaction(function () use ($reservationId, $userId) {
-            /** @var Reservation $reservation */
+            /** @var Reservation|null $reservation */
             $reservation = Reservation::lockForUpdate()->findOrFail($reservationId);
 
             if (!$reservation->isOwnedBy($userId)) {

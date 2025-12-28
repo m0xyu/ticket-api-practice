@@ -16,7 +16,7 @@ class ReservePendingAction
         return DB::transaction(function () use ($eventId, $userId) {
             $event = Event::lockForUpdate()->findOrFail($eventId);
 
-            /** @var Reservation $myReservation */
+            /** @var Reservation|null $myReservation */
             $myReservation = Reservation::eventAndUser($event->id, $userId)->first();
             if ($myReservation) {
                 if ($myReservation->isConfirmed()) {
