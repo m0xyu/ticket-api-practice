@@ -3,22 +3,13 @@
 namespace App\Actions\Event;
 
 use App\Enums\Errors\ReservationError;
-use App\Models\Reservation;
 use App\Enums\ReservationStatus;
 use App\Exceptions\ReservationException;
+use App\Models\Reservation;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
-class ConfirmReservationAction
+class CancelReservationAction
 {
-    /**
-     * 予約を確定するビジネスロジック
-     *
-     * @param int $reservationId
-     * @param int $userId
-     * @return Reservation
-     * @throws Exception
-     */
     public function execute(int $reservationId, int $userId): Reservation
     {
         return DB::transaction(function () use ($reservationId, $userId) {
@@ -29,20 +20,17 @@ class ConfirmReservationAction
                 throw new ReservationException(ReservationError::UNAUTHORIZED);
             }
 
-            if (
-                $reservation->isInvalid()
-            ) {
-                throw new ReservationException(ReservationError::EXPIRED_OR_CANCELED);
-            }
-
-            if ($reservation->isConfirmed()) {
+            if ($reservation->isCanceled()) {
                 return $reservation;
             }
 
+            if ($reservation->event->isStarted()) {
+                throw new ReservationException(ReservationError::CANCELLATION_NOT_ALLOWED);
+            }
+
             $reservation->update([
-                'status' => ReservationStatus::CONFIRMED,
-                'reserved_at' => now(),
-                'expires_at' => null,
+                'status' => ReservationStatus::CANCELED,
+                'canceled_at' => now(),
             ]);
 
             return $reservation;

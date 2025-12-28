@@ -14,10 +14,23 @@ class Event extends Model
     protected $fillable = [
         'name',
         'total_seats',
+        'start_at',
+        'end_at',
+    ];
+
+    protected $casts = [
+        'total_seats' => 'integer',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
     ];
 
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function isStarted(): bool
+    {
+        return $this->start_at !== null && $this->start_at->isPast();
     }
 }

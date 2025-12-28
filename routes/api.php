@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\TicketController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Middleware\IdempotencyMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +18,8 @@ Route::prefix('v1')->group(function () {
         // 予約確定エンドポイント (ミドルウェア適用)
         Route::post('/reservations/{reservationId}/confirm', [TicketController::class, 'confirmReservation'])
             ->middleware(IdempotencyMiddleware::class);
+
+        Route::post('/reservations/{reservationId}/cancel', [TicketController::class, 'cancelReservation']);
 
         Route::post('/logout', [LoginController::class, 'logout']);
     });
