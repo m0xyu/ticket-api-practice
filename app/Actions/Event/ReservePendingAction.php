@@ -16,30 +16,21 @@ class ReservePendingAction
         return DB::transaction(function () use ($eventId, $userId) {
             $event = Event::lockForUpdate()->findOrFail($eventId);
 
-            $myReservation = Reservation::where('event_id', $event->id)
-                ->where('user_id', $userId)
-                ->first();
-
+            /** @var Reservation $myReservation */
+            $myReservation = Reservation::eventAndUser($event->id, $userId)->first();
             if ($myReservation) {
-                if ($myReservation->status === ReservationStatus::CONFIRMED) {
+                if ($myReservation->isConfirmed()) {
                     throw new ReservationException(ReservationError::ALREADY_CONFIRMED);
                 }
 
-                if (
-                    $myReservation->status === ReservationStatus::PENDING &&
-                    $myReservation->expires_at > now()
-                ) {
+                if (!$myReservation->isInvalid()) {
                     return $myReservation;
                 }
             }
+
             $currentReservations = Reservation::where('event_id', $event->id)
-                ->where(function ($query) {
-                    $query->where('status', ReservationStatus::CONFIRMED)
-                        ->orWhere(function ($q) {
-                            $q->where('status', ReservationStatus::PENDING)
-                                ->where('expires_at', '>', now());
-                        });
-                })->count();
+                ->active()
+                ->count();
 
             if ($currentReservations >= $event->total_seats) {
                 throw new ReservationException(ReservationError::SEATS_FULL);

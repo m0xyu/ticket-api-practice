@@ -22,18 +22,22 @@ class ConfirmReservationAction
     public function execute(int $reservationId, int $userId): Reservation
     {
         return DB::transaction(function () use ($reservationId, $userId) {
+            /** @var Reservation $reservation */
             $reservation = Reservation::lockForUpdate()->findOrFail($reservationId);
 
-            if ($reservation->user_id !== $userId) {
+            if (!$reservation->isOwnedBy($userId)) {
                 throw new ReservationException(ReservationError::UNAUTHORIZED);
             }
 
             if (
-                $reservation->status === ReservationStatus::CANCELED ||
-                ($reservation->status === ReservationStatus::PENDING && $reservation->expires_at < now())
+                $reservation->isInvalid()
             ) {
                 // 実務ではここで決済キャンセルの処理などを挟む
                 throw new ReservationException(ReservationError::EXPIRED_OR_CANCELED);
+            }
+
+            if ($reservation->isConfirmed()) {
+                return $reservation;
             }
 
             $reservation->update([

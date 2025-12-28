@@ -5,10 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
-use App\Enums\ReservationStatus;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
