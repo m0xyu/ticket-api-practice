@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
@@ -108,37 +109,17 @@ class TicketController extends Controller
      * 決済Apiからのコールバックで呼ばれる想定
      * ミドルウェアで冪等性を保証
      */
-    public function confirmReservation(int $reservationId)
+    public function confirmReservation(int $reservationId, ConfirmReservationAction $action)
     {
-        return DB::transaction(function () use ($reservationId) {
-            $reservation = Reservation::lockForUpdate()->findOrFail($reservationId);
-
-            if ($reservation->user_id !== Auth::id()) {
-                return response()->json(['message' => 'この予約を確定する権限がありません'], 403);
-            }
-
-            if ($reservation->status === ReservationStatus::CONFIRMED) {
-                return response()->json(['message' => 'すでに確定済みです'], 200);
-            }
-
-            if (
-                $reservation->status === ReservationStatus::CANCELED ||
-                ($reservation->status === ReservationStatus::PENDING && $reservation->expires_at < now())
-            ) {
-                // ここで返金処理(Refund)を呼ぶ必要がある
-                return response()->json(['message' => '有効期限切れです。再度予約してください。'], 400);
-            }
-
-            $reservation->update([
-                'status' => ReservationStatus::CONFIRMED,
-                'confirmed_at' => now(),
-                'expires_at' => null,
-            ]);
-
+        try {
+            $reservation = $action->execute($reservationId, Auth::id());
             return response()->json([
                 'message' => '予約が確定しました',
                 'reservation_id' => $reservation->id
             ], 200);
-        });
+        } catch (\Exception $e) {
+            $status = $e->getCode() ?: 500;
+            return response()->json(['message' => $e->getMessage()], $status);
+        }
     }
 }
