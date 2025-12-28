@@ -2,7 +2,9 @@
 
 namespace App\Actions\Event;
 
+use App\Enums\Errors\ReservationError;
 use App\Enums\ReservationStatus;
+use App\Exceptions\ReservationException;
 use App\Models\Event;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,7 @@ class ReservePendingAction
 
             if ($myReservation) {
                 if ($myReservation->status === ReservationStatus::CONFIRMED) {
-                    throw new \Exception('すでに予約済みです', 409);
+                    throw new ReservationException(ReservationError::ALREADY_CONFIRMED);
                 }
 
                 if (
@@ -40,7 +42,7 @@ class ReservePendingAction
                 })->count();
 
             if ($currentReservations >= $event->total_seats) {
-                throw new \Exception('満席です', 409);
+                throw new ReservationException(ReservationError::SEATS_FULL);
             }
 
             return Reservation::updateOrCreate([

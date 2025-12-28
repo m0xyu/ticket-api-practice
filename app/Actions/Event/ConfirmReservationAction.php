@@ -2,8 +2,10 @@
 
 namespace App\Actions\Event;
 
+use App\Enums\Errors\ReservationError;
 use App\Models\Reservation;
 use App\Enums\ReservationStatus;
+use App\Exceptions\ReservationException;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
@@ -23,11 +25,7 @@ class ConfirmReservationAction
             $reservation = Reservation::lockForUpdate()->findOrFail($reservationId);
 
             if ($reservation->user_id !== $userId) {
-                throw new Exception('この予約を確定する権限がありません', 403);
-            }
-
-            if ($reservation->status === ReservationStatus::CONFIRMED) {
-                return $reservation;
+                throw new ReservationException(ReservationError::UNAUTHORIZED);
             }
 
             if (
@@ -35,12 +33,12 @@ class ConfirmReservationAction
                 ($reservation->status === ReservationStatus::PENDING && $reservation->expires_at < now())
             ) {
                 // 実務ではここで決済キャンセルの処理などを挟む
-                throw new Exception('有効期限切れです。再度予約してください。', 400);
+                throw new ReservationException(ReservationError::EXPIRED_OR_CANCELED);
             }
 
             $reservation->update([
                 'status' => ReservationStatus::CONFIRMED,
-                'confirmed_at' => now(),
+                'reserved_at' => now(),
                 'expires_at' => null,
             ]);
 

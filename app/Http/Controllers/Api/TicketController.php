@@ -87,20 +87,12 @@ class TicketController extends Controller
      */
     public function reservePending(int $eventId, ReservePendingAction $action)
     {
-        try {
-            $reservation = $action->execute($eventId, Auth::id());
-            return response()->json([
-                'message' => '仮予約が完了しました',
-                'reservation_id' => $reservation->id,
-                'expires_at' => $reservation->expires_at,
-            ], 201);
-        } catch (\Exception $e) {
-            if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-                throw $e;
-            }
-            $status = $e->getCode() ?: 500;
-            return response()->json(['message' => $e->getMessage()], $status);
-        }
+        $reservation = $action->execute($eventId, Auth::id());
+        return response()->json([
+            'message' => '仮予約が完了しました',
+            'reservation_id' => $reservation->id,
+            'expires_at' => $reservation->expires_at,
+        ], 201);
     }
 
     /**
@@ -111,15 +103,10 @@ class TicketController extends Controller
      */
     public function confirmReservation(int $reservationId, ConfirmReservationAction $action)
     {
-        try {
-            $reservation = $action->execute($reservationId, Auth::id());
-            return response()->json([
-                'message' => '予約が確定しました',
-                'reservation_id' => $reservation->id
-            ], 200);
-        } catch (\Exception $e) {
-            $status = $e->getCode() ?: 500;
-            return response()->json(['message' => $e->getMessage()], $status);
-        }
+        $reservation = $action->execute($reservationId, Auth::id());
+        return response()->json([
+            'message' => '予約が確定しました',
+            'reservation_id' => $reservation->id
+        ], 200);
     }
 }
