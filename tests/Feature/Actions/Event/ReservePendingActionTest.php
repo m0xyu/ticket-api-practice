@@ -3,11 +3,12 @@
 namespace Tests\Feature\Actions\Event;
 
 use App\Actions\Event\ReservePendingAction;
+use App\Enums\Errors\ReservationError;
 use App\Enums\ReservationStatus;
+use App\Exceptions\ReservationException;
 use App\Models\Event;
 use App\Models\Reservation;
 use App\Models\User;
-use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -56,9 +57,9 @@ describe('ReservePendingAction', function () {
         ]);
 
         expect(fn() => $this->action->execute($event->id, $user3->id))
-            ->toThrow(Exception::class, '満席です')
-            ->toThrow(function (Exception $e) {
-                return $e->getCode() === 409;
+            ->toThrow(ReservationException::class, ReservationError::SEATS_FULL->message())
+            ->toThrow(function (ReservationException $e) {
+                return $e->getCode() === ReservationError::SEATS_FULL->status();
             });
     });
 
@@ -77,9 +78,9 @@ describe('ReservePendingAction', function () {
         ]);
 
         expect(fn() => $this->action->execute($event->id, $user->id))
-            ->toThrow(Exception::class, 'すでに予約済みです')
-            ->toThrow(function (Exception $e) {
-                return $e->getCode() === 409;
+            ->toThrow(ReservationException::class, ReservationError::ALREADY_CONFIRMED->message())
+            ->toThrow(function (ReservationException $e) {
+                return $e->getCode() === ReservationError::ALREADY_CONFIRMED->status();
             });
     });
 
