@@ -1,0 +1,117 @@
+name: 認証
+description: ''
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/login
+    metadata:
+      custom: []
+      groupName: 認証
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        ログイン
+        * SPA認証用のログイン処理です。
+        成功すると `laravel_session` クッキーが発行されます。
+      description: ''
+      authenticated: false
+      deprecated: false
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      email:
+        custom: []
+        name: email
+        description: ''
+        required: true
+        example: test@example.com
+        type: ユーザーのメールアドレス
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      password:
+        custom: []
+        name: password
+        description: ''
+        required: true
+        example: password
+        type: ユーザーのパスワード
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      email: test@example.com
+      password: password
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"message":"Authenticated."}'
+        headers: []
+        description: 成功時（Cookie発行）
+      -
+        custom: []
+        status: 422
+        content: '{"errors":{"email":["The provided credentials do not match our records."]}}'
+        headers: []
+        description: ログイン失敗
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/logout
+    metadata:
+      custom: []
+      groupName: 認証
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        ログアウト
+        * SPA認証用のログアウト処理です。
+        `laravel_session` クッキーを無効化します。
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Cookie: '{YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: '{"message":"Logged out"}'
+        headers: []
+        description: 成功時（Cookie無効化）
+    responseFields: []
+    auth:
+      - headers
+      - Cookie
+      - 6g43cv8PD1aE5beadkZfhV6
+    controller: null
+    method: null
+    route: null
