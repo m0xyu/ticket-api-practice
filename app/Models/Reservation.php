@@ -9,6 +9,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 
+/**
+ * @property int $id
+ * @property int $event_id
+ * @property int $user_id
+ * @property ReservationStatus $status 予約ステータス
+ * @property \Illuminate\Support\Carbon $reserved_at
+ * @property \Illuminate\Support\Carbon|null $expires_at 有効期限
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $canceled_at
+ * @property-read \App\Models\Event $event
+ * @method static Builder<static>|Reservation active()
+ * @method static Builder<static>|Reservation eventAndUser(int $eventId, int $userId)
+ * @method static \Database\Factories\ReservationFactory factory($count = null, $state = [])
+ * @method static Builder<static>|Reservation newModelQuery()
+ * @method static Builder<static>|Reservation newQuery()
+ * @method static Builder<static>|Reservation query()
+ * @method static Builder<static>|Reservation whereCanceledAt($value)
+ * @method static Builder<static>|Reservation whereCreatedAt($value)
+ * @method static Builder<static>|Reservation whereEventId($value)
+ * @method static Builder<static>|Reservation whereExpiresAt($value)
+ * @method static Builder<static>|Reservation whereId($value)
+ * @method static Builder<static>|Reservation whereReservedAt($value)
+ * @method static Builder<static>|Reservation whereStatus($value)
+ * @method static Builder<static>|Reservation whereUpdatedAt($value)
+ * @method static Builder<static>|Reservation whereUserId($value)
+ * @mixin \Eloquent
+ */
 class Reservation extends Model
 {
     use HasFactory;

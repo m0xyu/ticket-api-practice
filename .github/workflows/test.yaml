@@ -47,6 +47,9 @@ jobs:
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyse --memory-limit=2G
+
     - name: Execute tests (Pest)
       env:
         # 立ち上げたMySQLサービスに接続する設定
