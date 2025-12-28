@@ -19,6 +19,7 @@ class Reservation extends Model
         'reserved_at',
         'status',
         'expires_at',
+        'canceled_at',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class Reservation extends Model
         'reserved_at' => 'datetime',
         'status' => ReservationStatus::class,
         'expires_at' => 'datetime',
+        'canceled_at' => 'datetime',
     ];
 
     public function event(): BelongsTo
@@ -55,13 +57,22 @@ class Reservation extends Model
     }
 
     /**
-     * 予約が無効かどうかを判定する
+     * 予約がキャンセルされているかどうかを判定する
      *
      * @return bool
+     */
+    public function isCanceled(): bool
+    {
+        return $this->status === ReservationStatus::CANCELED;
+    }
+
+    /**
+     * 有効期限切れ、またはキャンセル済みか（＝無効な予約か）
      */
     public function isInvalid(): bool
     {
         return $this->status === ReservationStatus::CANCELED ||
+            $this->status === ReservationStatus::EXPIRED ||
             ($this->status === ReservationStatus::PENDING && $this->expires_at < now());
     }
 

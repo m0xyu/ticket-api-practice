@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Event\CancelReservationAction;
 use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
@@ -104,6 +105,20 @@ class TicketController extends Controller
         return response()->json([
             'message' => '予約が確定しました',
             'reservation_id' => $reservation->id
+        ], 200);
+    }
+
+    /**
+     * 予約キャンセルエンドポイント 
+     * 確定済みの予約をキャンセルし、イベント開始後のキャンセルはエラーを返す
+     */
+    public function cancelReservation(int $reservationId, CancelReservationAction $action)
+    {
+        $reservation = $action->execute($reservationId, Auth::id());
+        return response()->json([
+            'message' => '予約がキャンセルされました',
+            'reservation_id' => $reservation->id,
+            'canceled_at' => $reservation->canceled_at,
         ], 200);
     }
 }

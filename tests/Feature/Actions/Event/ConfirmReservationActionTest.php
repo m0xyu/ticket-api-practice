@@ -86,4 +86,24 @@ describe('ConfirmReservationAction', function () {
                 return $e->getCode() === ReservationError::EXPIRED_OR_CANCELED->status();
             });
     });
+
+    it('すでに確定済みの予約を確定する場合既存の予約を返すこと', function () {
+        $user = User::factory()->create();
+        $event = Event::factory()->create([
+            'name' => 'テストイベント',
+            'total_seats' => 10
+        ]);
+        $reservation = Reservation::factory()->create([
+            'user_id' => $user->id,
+            'event_id' => $event->id,
+            'status' => ReservationStatus::CONFIRMED,
+            'reserved_at' => now()->subMinutes(10),
+        ]);
+
+        $result = $this->action->execute($reservation->id, $user->id);
+
+        expect($result->id)->toEqual($reservation->id);
+        expect($result->status)->toEqual(ReservationStatus::CONFIRMED);
+        expect($result->reserved_at)->not->toBeNull();
+    });
 });

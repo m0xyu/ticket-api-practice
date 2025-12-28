@@ -21,7 +21,7 @@ class ReleaseExpiredReservations extends Command
      *
      * @var string
      */
-    protected $description = '期限切れの仮予約をキャンセルステータスに変更し、解放します';
+    protected $description = '仮予約のステータスを期限切れに変更し、解放します';
 
     /**
      * Execute the console command.
@@ -33,7 +33,7 @@ class ReleaseExpiredReservations extends Command
         $count = DB::transaction(function () {
             return Reservation::where('status', ReservationStatus::PENDING)
                 ->where('expires_at', '<', now())
-                ->update(['status' => ReservationStatus::CANCELED]);
+                ->update(['status' => ReservationStatus::EXPIRED]);
         });
 
         if ($count > 0) {

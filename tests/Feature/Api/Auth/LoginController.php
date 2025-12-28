@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Api;
+namespace Tests\Feature\Api\Auth;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;

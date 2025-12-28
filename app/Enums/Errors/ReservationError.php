@@ -19,6 +19,10 @@ enum ReservationError: string
     #[ErrorDetails('満席です', 409)]
     case SEATS_FULL = 'seats_full';
 
+    #[ErrorDetails('イベント開始後のためキャンセルできません', 400)]
+    case CANCELLATION_NOT_ALLOWED = 'cancellation_not_allowed';
+
+
     /**
      * 属性からメッセージを取得
      */
