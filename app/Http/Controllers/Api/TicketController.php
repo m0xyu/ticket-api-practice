@@ -7,6 +7,7 @@ use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Knuckles\Scribe\Attributes\Authenticated;
 use Knuckles\Scribe\Attributes\Group;
 use Knuckles\Scribe\Attributes\Header;
@@ -96,11 +97,11 @@ class TicketController extends Controller
      */
     #[Group('予約管理')]
     #[Authenticated()]
-    #[Header("Idempotency-Key", "123e4567-e89b-12d3-a456-426614174000")]
-    #[UrlParam(name: 'eventId', description: '予約するイベントのID', example: 123, type: 'integer')]
+    #[Header("Idempotency-Key", "test-key-001")]
+    #[UrlParam(name: 'eventId', description: '予約するイベントのID', example: 1, type: 'integer')]
     #[Response([
         'message' => '仮予約が完了しました',
-        "reservation_id" => 123,
+        "reservation_id" => 1,
         "expires_at" => "2025-12-29T10:00:00.000000Z"
     ], 201, "成功時")]
     #[Response([
@@ -135,11 +136,11 @@ class TicketController extends Controller
      */
     #[Group('予約管理')]
     #[Authenticated()]
-    #[Header("Idempotency-Key", "123e4567-e89b-12d3-a456-426614174000")]
-    #[UrlParam(name: 'reservationId', description: '仮予約中の予約のID', example: 123, type: 'integer')]
+    #[Header("Idempotency-Key", "test-confirm-002")]
+    #[UrlParam(name: 'reservationId', description: '仮予約中の予約のID', example: 1, type: 'integer')]
     #[Response([
         'message' => '予約が確定しました',
-        "reservation_id" => 123,
+        "reservation_id" => 1,
     ], 200, "成功時")]
     #[Response([
         "message" => "有効期限切れです。再度予約してください。",
@@ -167,9 +168,9 @@ class TicketController extends Controller
      */
     #[Group('予約管理')]
     #[Authenticated()]
-    #[UrlParam(name: 'reservationId', description: 'キャンセルする予約のID', example: 123, type: 'integer')]
+    #[UrlParam(name: 'reservationId', description: 'キャンセルする予約のID', example: 1, type: 'integer')]
     #[Response([
-        "id" => 123,
+        "id" => 1,
         "status" => "canceled",
         "canceled_at" => "2025-12-29T10:00:00.000000Z"
     ], 200, "成功時")]

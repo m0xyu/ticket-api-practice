@@ -123,7 +123,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: December 28, 2025</li>
+        <li>Last updated: December 29, 2025</li>
     </ul>
 </div>
 
@@ -169,21 +169,21 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/events/123/reserve-pending" \
+    "http://localhost/api/v1/events/1/reserve-pending" \
     --header "Cookie: {YOUR_AUTH_KEY}" \
-    --header "Idempotency-Key: 123e4567-e89b-12d3-a456-426614174000" \
+    --header "Idempotency-Key: test-key-001" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/events/123/reserve-pending"
+    "http://localhost/api/v1/events/1/reserve-pending"
 );
 
 const headers = {
     "Cookie": "{YOUR_AUTH_KEY}",
-    "Idempotency-Key": "123e4567-e89b-12d3-a456-426614174000",
+    "Idempotency-Key": "test-key-001",
     "Content-Type": "application/json",
     "Accept": "application/json",
 };
@@ -203,7 +203,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;message&quot;: &quot;仮予約が完了しました&quot;,
-    &quot;reservation_id&quot;: 123,
+    &quot;reservation_id&quot;: 1,
     &quot;expires_at&quot;: &quot;2025-12-29T10:00:00.000000Z&quot;
 }</code>
  </pre>
@@ -294,10 +294,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="Idempotency-Key"                data-endpoint="POSTapi-v1-events--eventId--reserve-pending"
-               value="123e4567-e89b-12d3-a456-426614174000"
+               value="test-key-001"
                data-component="header">
     <br>
-<p>Example: <code>123e4567-e89b-12d3-a456-426614174000</code></p>
+<p>Example: <code>test-key-001</code></p>
             </div>
                                 <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
@@ -331,10 +331,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="eventId"                data-endpoint="POSTapi-v1-events--eventId--reserve-pending"
-               value="123"
+               value="1"
                data-component="url">
     <br>
-<p>予約するイベントのID Example: <code>123</code></p>
+<p>予約するイベントのID Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -359,21 +359,21 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/reservations/123/confirm" \
+    "http://localhost/api/v1/reservations/1/confirm" \
     --header "Cookie: {YOUR_AUTH_KEY}" \
-    --header "Idempotency-Key: 123e4567-e89b-12d3-a456-426614174000" \
+    --header "Idempotency-Key: test-confirm-002" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/reservations/123/confirm"
+    "http://localhost/api/v1/reservations/1/confirm"
 );
 
 const headers = {
     "Cookie": "{YOUR_AUTH_KEY}",
-    "Idempotency-Key": "123e4567-e89b-12d3-a456-426614174000",
+    "Idempotency-Key": "test-confirm-002",
     "Content-Type": "application/json",
     "Accept": "application/json",
 };
@@ -393,7 +393,7 @@ fetch(url, {
 
 <code class="language-json" style="max-height: 300px;">{
     &quot;message&quot;: &quot;予約が確定しました&quot;,
-    &quot;reservation_id&quot;: 123
+    &quot;reservation_id&quot;: 1
 }</code>
  </pre>
             <blockquote>
@@ -483,10 +483,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="Idempotency-Key"                data-endpoint="POSTapi-v1-reservations--reservationId--confirm"
-               value="123e4567-e89b-12d3-a456-426614174000"
+               value="test-confirm-002"
                data-component="header">
     <br>
-<p>Example: <code>123e4567-e89b-12d3-a456-426614174000</code></p>
+<p>Example: <code>test-confirm-002</code></p>
             </div>
                                 <div style="padding-left: 28px; clear: unset;">
                 <b style="line-height: 2;"><code>Content-Type</code></b>&nbsp;&nbsp;
@@ -520,10 +520,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="reservationId"                data-endpoint="POSTapi-v1-reservations--reservationId--confirm"
-               value="123"
+               value="1"
                data-component="url">
     <br>
-<p>仮予約中の予約のID Example: <code>123</code></p>
+<p>仮予約中の予約のID Example: <code>1</code></p>
             </div>
                     </form>
 
@@ -541,7 +541,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/reservations/123/cancel" \
+    "http://localhost/api/v1/reservations/1/cancel" \
     --header "Cookie: {YOUR_AUTH_KEY}" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -549,7 +549,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/reservations/123/cancel"
+    "http://localhost/api/v1/reservations/1/cancel"
 );
 
 const headers = {
@@ -572,7 +572,7 @@ fetch(url, {
                 <pre>
 
 <code class="language-json" style="max-height: 300px;">{
-    &quot;id&quot;: 123,
+    &quot;id&quot;: 1,
     &quot;status&quot;: &quot;canceled&quot;,
     &quot;canceled_at&quot;: &quot;2025-12-29T10:00:00.000000Z&quot;
 }</code>
@@ -689,10 +689,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="number" style="display: none"
                step="any"               name="reservationId"                data-endpoint="POSTapi-v1-reservations--reservationId--cancel"
-               value="123"
+               value="1"
                data-component="url">
     <br>
-<p>キャンセルする予約のID Example: <code>123</code></p>
+<p>キャンセルする予約のID Example: <code>1</code></p>
             </div>
                     </form>
 

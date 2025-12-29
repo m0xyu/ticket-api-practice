@@ -29,7 +29,7 @@ endpoints:
       deprecated: false
     headers:
       Cookie: '{YOUR_AUTH_KEY}'
-      Idempotency-Key: 123e4567-e89b-12d3-a456-426614174000
+      Idempotency-Key: test-key-001
       Content-Type: application/json
       Accept: application/json
     urlParameters:
@@ -38,14 +38,14 @@ endpoints:
         name: eventId
         description: 予約するイベントのID
         required: true
-        example: 123
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      eventId: 123
+      eventId: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -55,7 +55,7 @@ endpoints:
       -
         custom: []
         status: 201
-        content: '{"message":"\u4eee\u4e88\u7d04\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f","reservation_id":123,"expires_at":"2025-12-29T10:00:00.000000Z"}'
+        content: '{"message":"\u4eee\u4e88\u7d04\u304c\u5b8c\u4e86\u3057\u307e\u3057\u305f","reservation_id":1,"expires_at":"2025-12-29T10:00:00.000000Z"}'
         headers: []
         description: 成功時
       -
@@ -103,7 +103,7 @@ endpoints:
       deprecated: false
     headers:
       Cookie: '{YOUR_AUTH_KEY}'
-      Idempotency-Key: 123e4567-e89b-12d3-a456-426614174000
+      Idempotency-Key: test-confirm-002
       Content-Type: application/json
       Accept: application/json
     urlParameters:
@@ -112,14 +112,14 @@ endpoints:
         name: reservationId
         description: 仮予約中の予約のID
         required: true
-        example: 123
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      reservationId: 123
+      reservationId: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -129,7 +129,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"message":"\u4e88\u7d04\u304c\u78ba\u5b9a\u3057\u307e\u3057\u305f","reservation_id":123}'
+        content: '{"message":"\u4e88\u7d04\u304c\u78ba\u5b9a\u3057\u307e\u3057\u305f","reservation_id":1}'
         headers: []
         description: 成功時
       -
@@ -177,14 +177,14 @@ endpoints:
         name: reservationId
         description: キャンセルする予約のID
         required: true
-        example: 123
+        example: 1
         type: integer
         enumValues: []
         exampleWasSpecified: false
         nullable: false
         deprecated: false
     cleanUrlParameters:
-      reservationId: 123
+      reservationId: 1
     queryParameters: []
     cleanQueryParameters: []
     bodyParameters: []
@@ -194,7 +194,7 @@ endpoints:
       -
         custom: []
         status: 200
-        content: '{"id":123,"status":"canceled","canceled_at":"2025-12-29T10:00:00.000000Z"}'
+        content: '{"id":1,"status":"canceled","canceled_at":"2025-12-29T10:00:00.000000Z"}'
         headers: []
         description: 成功時
       -

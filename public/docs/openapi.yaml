@@ -41,7 +41,7 @@ paths:
           in: header
           name: Idempotency-Key
           description: ''
-          example: 123e4567-e89b-12d3-a456-426614174000
+          example: test-key-001
           schema:
             type: string
       responses:
@@ -53,7 +53,7 @@ paths:
                 type: object
                 example:
                   message: 仮予約が完了しました
-                  reservation_id: 123
+                  reservation_id: 1
                   expires_at: '2025-12-29T10:00:00.000000Z'
                 properties:
                   message:
@@ -61,7 +61,7 @@ paths:
                     example: 仮予約が完了しました
                   reservation_id:
                     type: integer
-                    example: 123
+                    example: 1
                   expires_at:
                     type: string
                     example: '2025-12-29T10:00:00.000000Z'
@@ -104,7 +104,7 @@ paths:
         in: path
         name: eventId
         description: 予約するイベントのID
-        example: 123
+        example: 1
         required: true
         schema:
           type: integer
@@ -125,7 +125,7 @@ paths:
           in: header
           name: Idempotency-Key
           description: ''
-          example: 123e4567-e89b-12d3-a456-426614174000
+          example: test-confirm-002
           schema:
             type: string
       responses:
@@ -137,14 +137,14 @@ paths:
                 type: object
                 example:
                   message: 予約が確定しました
-                  reservation_id: 123
+                  reservation_id: 1
                 properties:
                   message:
                     type: string
                     example: 予約が確定しました
                   reservation_id:
                     type: integer
-                    example: 123
+                    example: 1
         400:
           description: 仮予約の有効期限切れ
           content:
@@ -184,7 +184,7 @@ paths:
         in: path
         name: reservationId
         description: 仮予約中の予約のID
-        example: 123
+        example: 1
         required: true
         schema:
           type: integer
@@ -209,13 +209,13 @@ paths:
               schema:
                 type: object
                 example:
-                  id: 123
+                  id: 1
                   status: canceled
                   canceled_at: '2025-12-29T10:00:00.000000Z'
                 properties:
                   id:
                     type: integer
-                    example: 123
+                    example: 1
                   status:
                     type: string
                     example: canceled
@@ -261,7 +261,7 @@ paths:
         in: path
         name: reservationId
         description: キャンセルする予約のID
-        example: 123
+        example: 1
         required: true
         schema:
           type: integer
