@@ -64,6 +64,11 @@ class Reservation extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * 予約が確定しているかどうかを判定する
      *
