@@ -7,6 +7,12 @@ use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Knuckles\Scribe\Attributes\Authenticated;
+use Knuckles\Scribe\Attributes\Group;
+use Knuckles\Scribe\Attributes\Header;
+use Knuckles\Scribe\Attributes\Response;
+use Knuckles\Scribe\Attributes\UrlParam;
 
 class TicketController extends Controller
 {
@@ -77,12 +83,35 @@ class TicketController extends Controller
     // }
 
     /**
-     * * 仮予約エンドポイント (Phase 3)
-     * データベースの排他制御（行ロック）を用いてオーバーブッキングを防止
-     * 仮予約(Pending)ステータスで席を確保し、一定時間内に確定しない場合は自動的に解放
-     * ミドルウェアで冪等性を保証
-     * 
+     * 仮予約
+     * * 座席を確保し、仮予約状態（PENDING）を作成します。
+     * 成功すると `201 Created` が返されます。
+     * * <aside class="notice">
+     * <strong>冪等性キーについて</strong><br>
+     * このエンドポイントは <code>Idempotency-Key</code> ヘッダーに対応しています。<br>
+     * ネットワークエラー時の二重予約を防ぐため、UUIDなどの一意なキーをヘッダーに含めることを推奨します。
+     * </aside>
+     * * @param int $eventId
+     * @param ReservePendingAction $action
+     * @return \Illuminate\Http\JsonResponse
      */
+    #[Group('予約管理')]
+    #[Authenticated()]
+    #[Header("Idempotency-Key", "test-key-001")]
+    #[UrlParam(name: 'eventId', description: '予約するイベントのID', example: 1, type: 'integer')]
+    #[Response([
+        'message' => '仮予約が完了しました',
+        "reservation_id" => 1,
+        "expires_at" => "2025-12-29T10:00:00.000000Z"
+    ], 201, "成功時")]
+    #[Response([
+        "message" => "すでに予約済みです",
+        "error_code" => "already_confirmed"
+    ], 409, "すでに予約済み")]
+    #[Response([
+        "message" => "満席です",
+        "error_code" => "seats_full"
+    ], 409, "満席です")]
     public function reservePending(int $eventId, ReservePendingAction $action)
     {
         $reservation = $action->execute($eventId, Auth::id());
@@ -94,11 +123,33 @@ class TicketController extends Controller
     }
 
     /**
-     * 予約確定エンドポイント (Phase 3)
-     * 仮予約を確定に変更し、期限切れやキャンセルの場合はエラーを返す
-     * 決済Apiからのコールバックで呼ばれる想定
-     * ミドルウェアで冪等性を保証
+     * 予約確定
+     * * 仮予約（PENDING）を確定（CONFIRMED）に変更します。
+     * 決済完了後に呼び出してください。
+     * * <aside class="notice">
+     * <strong>冪等性キー（必須）</strong><br>
+     * 決済確定処理の二重実行を防ぐため、このエンドポイントでは <code>Idempotency-Key</code> が必須です。<br>
+     * </aside>
+     * * @param int $reservationId
+     * @param ConfirmReservationAction $action
+     * @return \Illuminate\Http\JsonResponse
      */
+    #[Group('予約管理')]
+    #[Authenticated()]
+    #[Header("Idempotency-Key", "test-confirm-002")]
+    #[UrlParam(name: 'reservationId', description: '仮予約中の予約のID', example: 1, type: 'integer')]
+    #[Response([
+        'message' => '予約が確定しました',
+        "reservation_id" => 1,
+    ], 200, "成功時")]
+    #[Response([
+        "message" => "有効期限切れです。再度予約してください。",
+        "error_code" => "expired_or_canceled"
+    ], 400, "仮予約の有効期限切れ")]
+    #[Response([
+        "message" => "この予約を確定する権限がありません",
+        "error_code" => "unauthorized"
+    ], 403, "権限エラー")]
     public function confirmReservation(int $reservationId, ConfirmReservationAction $action)
     {
         $reservation = $action->execute($reservationId, Auth::id());
@@ -110,8 +161,27 @@ class TicketController extends Controller
 
     /**
      * 予約キャンセルエンドポイント 
-     * 確定済みの予約をキャンセルし、イベント開始後のキャンセルはエラーを返す
+     * 
+     * @param int $reservationId
+     * @param CancelReservationAction $action
+     * @return \Illuminate\Http\JsonResponse
      */
+    #[Group('予約管理')]
+    #[Authenticated()]
+    #[UrlParam(name: 'reservationId', description: 'キャンセルする予約のID', example: 1, type: 'integer')]
+    #[Response([
+        "id" => 1,
+        "status" => "canceled",
+        "canceled_at" => "2025-12-29T10:00:00.000000Z"
+    ], 200, "成功時")]
+    #[Response([
+        "message" => "イベント開始後のためキャンセルできません",
+        "error_code" => "cancellation_not_allowed"
+    ], 400, "イベント開始後")]
+    #[Response([
+        "message" => "この予約を確定する権限がありません",
+        "error_code" => "unauthorized"
+    ], 403, "権限エラー")]
     public function cancelReservation(int $reservationId, CancelReservationAction $action)
     {
         $reservation = $action->execute($reservationId, Auth::id());

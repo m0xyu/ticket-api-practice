@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class ReservePendingAction
 {
+    /**
+     * 仮予約を作成するビジネスロジック
+     * @param int $eventId
+     * @param int $userId
+     * @return Reservation
+     * @throws ReservationException
+     */
     public function execute(int $eventId, int $userId): Reservation
     {
         return DB::transaction(function () use ($eventId, $userId) {

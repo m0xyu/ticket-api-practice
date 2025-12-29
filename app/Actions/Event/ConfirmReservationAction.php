@@ -7,7 +7,6 @@ use App\Models\Reservation;
 use App\Enums\ReservationStatus;
 use App\Exceptions\ReservationException;
 use Illuminate\Support\Facades\DB;
-use Exception;
 
 class ConfirmReservationAction
 {
@@ -17,7 +16,7 @@ class ConfirmReservationAction
      * @param int $reservationId
      * @param int $userId
      * @return Reservation
-     * @throws Exception
+     * @throws ReservationException
      */
     public function execute(int $reservationId, int $userId): Reservation
     {

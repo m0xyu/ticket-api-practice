@@ -1,0 +1,355 @@
+openapi: 3.0.3
+info:
+  title: '予約システム API仕様書'
+  description: ''
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost'
+tags:
+  -
+    name: 予約管理
+    description: ''
+  -
+    name: 認証
+    description: ''
+components:
+  securitySchemes:
+    default:
+      type: apiKey
+      name: Cookie
+      in: header
+      description: null
+security:
+  -
+    default: []
+paths:
+  '/api/v1/events/{eventId}/reserve-pending':
+    post:
+      summary: "仮予約\n* 座席を確保し、仮予約状態（PENDING）を作成します。\n成功すると `201 Created` が返されます。\n* <aside class=\"notice\">\n<strong>冪等性キーについて</strong><br>\nこのエンドポイントは <code>Idempotency-Key</code> ヘッダーに対応しています。<br>\nネットワークエラー時の二重予約を防ぐため、UUIDなどの一意なキーをヘッダーに含めることを推奨します。\n</aside>\n* @param int $eventId"
+      operationId: PENDING201CreatedasideClassnoticestrongstrongbrcodeIdempotencyKeycodebrUUIDasideparamInteventId
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Cookie
+          description: ''
+          example: '{YOUR_AUTH_KEY}'
+          schema:
+            type: string
+        -
+          in: header
+          name: Idempotency-Key
+          description: ''
+          example: test-key-001
+          schema:
+            type: string
+      responses:
+        201:
+          description: 成功時
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 仮予約が完了しました
+                  reservation_id: 1
+                  expires_at: '2025-12-29T10:00:00.000000Z'
+                properties:
+                  message:
+                    type: string
+                    example: 仮予約が完了しました
+                  reservation_id:
+                    type: integer
+                    example: 1
+                  expires_at:
+                    type: string
+                    example: '2025-12-29T10:00:00.000000Z'
+        409:
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  -
+                    description: すでに予約済み
+                    type: object
+                    example:
+                      message: すでに予約済みです
+                      error_code: already_confirmed
+                    properties:
+                      message:
+                        type: string
+                        example: すでに予約済みです
+                      error_code:
+                        type: string
+                        example: already_confirmed
+                  -
+                    description: 満席です
+                    type: object
+                    example:
+                      message: 満席です
+                      error_code: seats_full
+                    properties:
+                      message:
+                        type: string
+                        example: 満席です
+                      error_code:
+                        type: string
+                        example: seats_full
+      tags:
+        - 予約管理
+    parameters:
+      -
+        in: path
+        name: eventId
+        description: 予約するイベントのID
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/reservations/{reservationId}/confirm':
+    post:
+      summary: "予約確定\n* 仮予約（PENDING）を確定（CONFIRMED）に変更します。\n決済完了後に呼び出してください。\n* <aside class=\"notice\">\n<strong>冪等性キー（必須）</strong><br>\n決済確定処理の二重実行を防ぐため、このエンドポイントでは <code>Idempotency-Key</code> が必須です。<br>\n</aside>\n* @param int $reservationId"
+      operationId: PENDINGCONFIRMEDasideClassnoticestrongstrongbrcodeIdempotencyKeycodebrasideparamIntreservationId
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Cookie
+          description: ''
+          example: '{YOUR_AUTH_KEY}'
+          schema:
+            type: string
+        -
+          in: header
+          name: Idempotency-Key
+          description: ''
+          example: test-confirm-002
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功時
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 予約が確定しました
+                  reservation_id: 1
+                properties:
+                  message:
+                    type: string
+                    example: 予約が確定しました
+                  reservation_id:
+                    type: integer
+                    example: 1
+        400:
+          description: 仮予約の有効期限切れ
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 有効期限切れです。再度予約してください。
+                  error_code: expired_or_canceled
+                properties:
+                  message:
+                    type: string
+                    example: 有効期限切れです。再度予約してください。
+                  error_code:
+                    type: string
+                    example: expired_or_canceled
+        403:
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: この予約を確定する権限がありません
+                  error_code: unauthorized
+                properties:
+                  message:
+                    type: string
+                    example: この予約を確定する権限がありません
+                  error_code:
+                    type: string
+                    example: unauthorized
+      tags:
+        - 予約管理
+    parameters:
+      -
+        in: path
+        name: reservationId
+        description: 仮予約中の予約のID
+        example: 1
+        required: true
+        schema:
+          type: integer
+  '/api/v1/reservations/{reservationId}/cancel':
+    post:
+      summary: 予約キャンセルエンドポイント
+      operationId: ''
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Cookie
+          description: ''
+          example: '{YOUR_AUTH_KEY}'
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功時
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 1
+                  status: canceled
+                  canceled_at: '2025-12-29T10:00:00.000000Z'
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  status:
+                    type: string
+                    example: canceled
+                  canceled_at:
+                    type: string
+                    example: '2025-12-29T10:00:00.000000Z'
+        400:
+          description: イベント開始後
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: イベント開始後のためキャンセルできません
+                  error_code: cancellation_not_allowed
+                properties:
+                  message:
+                    type: string
+                    example: イベント開始後のためキャンセルできません
+                  error_code:
+                    type: string
+                    example: cancellation_not_allowed
+        403:
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: この予約を確定する権限がありません
+                  error_code: unauthorized
+                properties:
+                  message:
+                    type: string
+                    example: この予約を確定する権限がありません
+                  error_code:
+                    type: string
+                    example: unauthorized
+      tags:
+        - 予約管理
+    parameters:
+      -
+        in: path
+        name: reservationId
+        description: キャンセルする予約のID
+        example: 1
+        required: true
+        schema:
+          type: integer
+  /api/v1/login:
+    post:
+      summary: "ログイン\n* SPA認証用のログイン処理です。\n成功すると `laravel_session` クッキーが発行されます。"
+      operationId: SPAlaravelSession
+      description: ''
+      parameters: []
+      responses:
+        200:
+          description: 成功時（Cookie発行）
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Authenticated.
+                properties:
+                  message:
+                    type: string
+                    example: Authenticated.
+        422:
+          description: ログイン失敗
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  errors:
+                    email:
+                      - 'The provided credentials do not match our records.'
+                properties:
+                  errors:
+                    type: object
+                    properties:
+                      email:
+                        type: array
+                        example:
+                          - 'The provided credentials do not match our records.'
+                        items:
+                          type: string
+      tags:
+        - 認証
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: ユーザーのメールアドレス
+                  description: ''
+                  example: test@example.com
+                password:
+                  type: ユーザーのパスワード
+                  description: ''
+                  example: password
+              required:
+                - email
+                - password
+      security: []
+  /api/v1/logout:
+    post:
+      summary: "ログアウト\n* SPA認証用のログアウト処理です。\n`laravel_session` クッキーを無効化します。"
+      operationId: SPAlaravelSession
+      description: ''
+      parameters:
+        -
+          in: header
+          name: Cookie
+          description: ''
+          example: '{YOUR_AUTH_KEY}'
+          schema:
+            type: string
+      responses:
+        200:
+          description: 成功時（Cookie無効化）
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: 'Logged out'
+                properties:
+                  message:
+                    type: string
+                    example: 'Logged out'
+      tags:
+        - 認証

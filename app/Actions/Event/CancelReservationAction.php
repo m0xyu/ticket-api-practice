@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class CancelReservationAction
 {
+    /**
+     * 予約をキャンセルするビジネスロジック
+     *
+     * @param int $reservationId
+     * @param int $userId
+     * @return Reservation
+     * @throws ReservationException
+     */
     public function execute(int $reservationId, int $userId): Reservation
     {
         return DB::transaction(function () use ($reservationId, $userId) {
