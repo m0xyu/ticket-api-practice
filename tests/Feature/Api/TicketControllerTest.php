@@ -21,10 +21,14 @@ describe('API: Reserve Pending', function () {
             ->withHeader('Idempotency-Key', uniqid())
             ->postJson("/api/v1/events/{$event->id}/reserve-pending");
         $response->assertStatus(201)
-            ->assertJsonStructure([
-                'message',
-                'reservation_id',
-                'expires_at'
+            ->assertJson([
+                'message' => '仮予約が完了しました',
+                'data' => [
+                    'id' => $response->json('data.id'),
+                    'event_id' => $event->id,
+                    'status' => 'pending',
+                    'expires_at' => $response->json('data.expires_at'),
+                ]
             ]);
     });
 
@@ -50,5 +54,60 @@ describe('API: Reserve Pending', function () {
             ->postJson("/api/v1/events/{$event->id}/reserve-pending")
             ->assertStatus(409)
             ->assertJson(['message' => '満席です']);
+    });
+
+    it('confirmReservationのテスト', function () {
+        $user = User::factory()->create();
+        $event = Event::factory()->create([
+            'name' => 'テストイベント',
+            'total_seats' => 10
+        ]);
+
+        // まず仮予約を作成
+        $reserveResponse = actingAs($user)
+            ->withHeader('Idempotency-Key', uniqid())
+            ->postJson("/api/v1/events/{$event->id}/reserve-pending");
+        $reserveResponse->assertStatus(201);
+        $reservationId = $reserveResponse->json('data.id');
+
+        // 仮予約を確定
+        $confirmResponse = actingAs($user)
+            ->withHeader('Idempotency-Key', uniqid())
+            ->postJson("/api/v1/reservations/{$reservationId}/confirm");
+        $confirmResponse->assertStatus(200)
+            ->assertJson([
+                'message' => '予約が確定しました',
+                'data' => [
+                    'status' => 'confirmed',
+                    'expires_at' => null,
+                ]
+            ]);
+    });
+
+    it('ccancelReservationのテスト', function () {
+        $user = User::factory()->create();
+        $event = Event::factory()->create([
+            'name' => 'テストイベント',
+            'total_seats' => 10
+        ]);
+
+        // まず仮予約を作成
+        $reserveResponse = actingAs($user)
+            ->withHeader('Idempotency-Key', uniqid())
+            ->postJson("/api/v1/events/{$event->id}/reserve-pending");
+        $reserveResponse->assertStatus(201);
+        $reservationId = $reserveResponse->json('data.id');
+
+        // 仮予約をキャンセル
+        $cancelResponse = actingAs($user)
+            ->postJson("/api/v1/reservations/{$reservationId}/cancel");
+        $cancelResponse->assertStatus(200)
+            ->assertJson([
+                'message' => '予約がキャンセルされました',
+                'data' => [
+                    'id' => $reservationId,
+                    'status' => 'canceled',
+                ]
+            ]);
     });
 });
