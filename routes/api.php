@@ -14,10 +14,10 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/events/{eventId}/reserve-pending', [TicketController::class, 'reservePending'])
             ->middleware(IdempotencyMiddleware::class);
-        Route::post('/reservations/{reservationId}/confirm', [TicketController::class, 'confirmReservation'])
+        Route::post('/reservations/{reservation}/confirm', [TicketController::class, 'confirmReservation'])
             ->middleware(IdempotencyMiddleware::class);
 
-        Route::post('/reservations/{reservationId}/cancel', [TicketController::class, 'cancelReservation']);
+        Route::post('/reservations/{reservation}/cancel', [TicketController::class, 'cancelReservation']);
 
         Route::post('/logout', [LoginController::class, 'logout']);
     });

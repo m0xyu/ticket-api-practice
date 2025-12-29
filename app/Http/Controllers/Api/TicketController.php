@@ -6,10 +6,10 @@ use App\Actions\Event\CancelReservationAction;
 use App\Actions\Event\ConfirmReservationAction;
 use App\Actions\Event\ReservePendingAction;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ConfirmReservationRequest;
-use App\Http\Requests\StoreReservationRequest;
 use App\Http\Resources\ReservationResource;
+use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Knuckles\Scribe\Attributes\Authenticated;
 use Knuckles\Scribe\Attributes\Group;
 use Knuckles\Scribe\Attributes\Header;
@@ -131,7 +131,7 @@ class TicketController extends Controller
      * <strong>冪等性キー（必須）</strong><br>
      * 決済確定処理の二重実行を防ぐため、このエンドポイントでは <code>Idempotency-Key</code> が必須です。<br>
      * </aside>
-     * * @param int $reservationId
+     * * @param Reservation $reservation
      * @param ConfirmReservationAction $action
      * @return \Illuminate\Http\JsonResponse
      */
@@ -151,9 +151,10 @@ class TicketController extends Controller
         "message" => "この予約を確定する権限がありません",
         "error_code" => "unauthorized"
     ], 403, "権限エラー")]
-    public function confirmReservation(int $reservationId, ConfirmReservationAction $action)
+    public function confirmReservation(Reservation $reservation, ConfirmReservationAction $action)
     {
-        $reservation = $action->execute($reservationId, Auth::id());
+        Gate::authorize('update', $reservation);
+        $reservation = $action->execute($reservation->id, Auth::id());
         return response()->json([
             'message' => '予約が確定しました',
             'data' => new ReservationResource($reservation),
@@ -163,7 +164,7 @@ class TicketController extends Controller
     /**
      * 予約キャンセルエンドポイント 
      * 
-     * @param int $reservationId
+     * @param Reservation $reservation
      * @param CancelReservationAction $action
      * @return \Illuminate\Http\JsonResponse
      */
@@ -183,9 +184,10 @@ class TicketController extends Controller
         "message" => "この予約を確定する権限がありません",
         "error_code" => "unauthorized"
     ], 403, "権限エラー")]
-    public function cancelReservation(int $reservationId, CancelReservationAction $action)
+    public function cancelReservation(Reservation $reservation, CancelReservationAction $action)
     {
-        $reservation = $action->execute($reservationId, Auth::id());
+        Gate::authorize('update', $reservation);
+        $reservation = $action->execute($reservation->id, Auth::id());
         return response()->json([
             'message' => '予約がキャンセルされました',
             'data' => new ReservationResource($reservation),

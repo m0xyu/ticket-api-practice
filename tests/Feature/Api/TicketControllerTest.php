@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Event;
+use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\{actingAs};
@@ -80,6 +81,16 @@ describe('API: Reserve Pending', function () {
                 'data' => [
                     'status' => 'confirmed',
                     'expires_at' => null,
+                ]
+            ])
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'id',
+                    'event_id',
+                    'status',
+                    'reserved_at',
+                    'expires_at',
                 ]
             ]);
     });
