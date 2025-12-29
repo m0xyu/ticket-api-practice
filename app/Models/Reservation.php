@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $canceled_at
  * @property-read \App\Models\Event $event
+ * @property-read \App\Models\User $user
  * @method static Builder<static>|Reservation active()
  * @method static Builder<static>|Reservation eventAndUser(int $eventId, int $userId)
  * @method static \Database\Factories\ReservationFactory factory($count = null, $state = [])
